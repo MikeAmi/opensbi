@@ -67,9 +67,13 @@ build_fit() {
 	type=$2
 	board_upper=`echo $board | tr '[:lower:]' '[:upper:]'`
 	echo " => Building FIT"
+	#Extract ATF image into atf-1,2,3,4,5
 	./scripts/extractbl31.py ${RKBIN}/${BL31}
+	#figure out its map: uboot-UEFI, atf-1/2/3/4/5, op-tee(rkbin folder), uefi-dtb(dtb floder)
 	cat uefi.its | sed "s,@BOARDTYPE@,${type},g" > ${board_upper}_EFI.its
+	#figure out xxxx_EFI.itb
 	./${RKBIN}/tools/mkimage -f ${board_upper}_EFI.its -E ${board_upper}_EFI.itb
+	#figure out full xxxx_EFI.itb : integrete uefi fd into .itb
 	dd if=Build/${board}/${RKUEFIBUILDTYPE}_GCC5/FV/RK356X_EFI.fd of=${board_upper}_EFI.itb bs=512 seek=$((1024 * 1024 / 512))
 	rm -f bl31_0x*.bin ${board_upper}_EFI.its
 }
